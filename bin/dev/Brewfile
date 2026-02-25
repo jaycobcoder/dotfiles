@@ -1,0 +1,6 @@
+# dev 스크립트 핵심 의존성
+brew "tmux"         # 세션 및 창 관리
+brew "lazygit"      # Git TUI 검증
+brew "fzf"          # 세션/워크트리 검색 및 선택
+brew "git-delta"    # Side-by-side diff 보기용
+brew "ripgrep"      # 고속 문자열 검색
