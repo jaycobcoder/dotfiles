@@ -27,9 +27,10 @@ ln -sf "$DOTFILES_DIR/ghostty/config" ~/.config/ghostty/config
 
 # ---------- 커스텀 명령어 ----------
 # dev 명령어
-ln -sf "$DOTFILES_DIR/bin/dev/dev.sh" /usr/local/bin/dev
+bash "$DOTFILES_DIR/bin/dev/install.sh"
+
 # devc 명령어
-ln -sf "$DOTFILES_DIR/bin/devc/devc.sh" /usr/local/bin/devc
+bash "$DOTFILES_DIR/bin/devc/install.sh"
 
 
 # oh-my-zsh 설치
