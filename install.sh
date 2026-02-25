@@ -25,8 +25,12 @@ ln -sf "$DOTFILES_DIR/tmux/.tmux.conf" ~/.tmux.conf
 mkdir -p ~/.config/ghostty
 ln -sf "$DOTFILES_DIR/ghostty/config" ~/.config/ghostty/config
 
+# ---------- 커스텀 명령어 ----------
 # dev 명령어
 ln -sf "$DOTFILES_DIR/bin/dev/dev.sh" /usr/local/bin/dev
+# devc 명령어
+ln -sf "$DOTFILES_DIR/bin/devc/devc.sh" /usr/local/bin/devc
+
 
 # oh-my-zsh 설치
 if [ ! -d "$HOME/.oh-my-zsh" ]; then
