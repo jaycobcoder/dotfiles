@@ -8,8 +8,11 @@ if [ -n "$1" ]; then
     BRANCH_NAME=$1
     TARGET_PATH="$WORKTREE_BASE_DIR/$REPO_NAME/$BRANCH_NAME"
     SESSION_NAME="${REPO_NAME}_${BRANCH_NAME}"
-    # 워크트리가 없으면 생성 (브랜치도 함께 생성)
-    if [ ! -d "$TARGET_PATH" ]; then
+    CURRENT_BRANCH=$(git branch --show-current)
+    if [ "$BRANCH_NAME" = "$CURRENT_BRANCH" ]; then
+        # 현재 브랜치면 워크트리 안 만들고 현재 디렉토리 사용
+        TARGET_PATH="$PWD"
+    elif [ ! -d "$TARGET_PATH" ]; then
         echo "🌿 워크트리 생성 중: $TARGET_PATH"
         if git show-ref --verify --quiet "refs/heads/$BRANCH_NAME"; then
             git worktree add "$TARGET_PATH" "$BRANCH_NAME"
