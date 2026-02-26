@@ -11,7 +11,11 @@ if [ -n "$1" ]; then
     # 워크트리가 없으면 생성 (브랜치도 함께 생성)
     if [ ! -d "$TARGET_PATH" ]; then
         echo "🌿 워크트리 생성 중: $TARGET_PATH"
-        git worktree add -b "$BRANCH_NAME" "$TARGET_PATH"
+        if git show-ref --verify --quiet "refs/heads/$BRANCH_NAME"; then
+            git worktree add "$TARGET_PATH" "$BRANCH_NAME"
+        else
+            git worktree add -b "$BRANCH_NAME" "$TARGET_PATH"
+        fi
     fi
     cd "$TARGET_PATH"
 else
