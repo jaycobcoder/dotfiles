@@ -95,9 +95,30 @@ dotfiles/
 │   └── .tmux.conf
 ├── ghostty/
 │   └── config
-└── bin/
-    ├── dev/
-    │   └── dev.sh
-    └── devc/
-        └── devc.sh
+├── bin/
+│   ├── dev/
+│   │   ├── dev.sh
+│   │   ├── install.sh
+│   │   └── Brewfile
+│   └── devc/
+│       ├── devc.sh
+│       └── install.sh
+└── docs/
+    ├── overview.md
+    ├── installation.md
+    ├── configuration.md
+    ├── commands.md
+    └── architecture.md
 ```
+
+---
+
+## Documentation
+
+자세한 문서는 `docs/` 디렉토리를 참고하세요.
+
+- [Project Overview](docs/overview.md) — 프로젝트 목적, 설계 철학, 핵심 구성 요소
+- [Installation Guide](docs/installation.md) — 상세 설치 가이드, 트러블슈팅
+- [Configuration Reference](docs/configuration.md) — 각 설정 파일(zsh, tmux, ghostty) 상세 명세
+- [Command Reference](docs/commands.md) — `dev`/`devc` 명령어 동작 원리, 워크플로우
+- [Architecture & Design](docs/architecture.md) — 심볼릭 링크 전략, 의존성 관리, worktree 아키텍처
