@@ -25,6 +25,11 @@ ln -sf "$DOTFILES_DIR/tmux/.tmux.conf" ~/.tmux.conf
 mkdir -p ~/.config/ghostty
 ln -sf "$DOTFILES_DIR/ghostty/config" ~/.config/ghostty/config
 
+# opencode
+mkdir -p ~/.config/opencode
+ln -sf "$DOTFILES_DIR/opencode/opencode.json" ~/.config/opencode/opencode.json
+ln -sf "$DOTFILES_DIR/opencode/tui.json" ~/.config/opencode/tui.json
+
 # ---------- 커스텀 명령어 ----------
 # dev 명령어
 bash "$DOTFILES_DIR/bin/dev/install.sh"
