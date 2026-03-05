@@ -63,6 +63,7 @@ Multiple `dev` sessions can run simultaneously, each on a different branch, full
 | **Zsh** (oh-my-zsh) | `zsh/.zshrc` | Shell with agnoster theme, git plugin, syntax highlighting, autosuggestions |
 | **Tmux** | `tmux/.tmux.conf` | Terminal multiplexer with `Ctrl-A` prefix, 1-based window indexing |
 | **Ghostty** | `ghostty/config` | Terminal emulator with Catppuccin Mocha theme, Cmd+number tmux integration |
+| **OpenCode** | `opencode/opencode.json`, `opencode/tui.json` | AI coding agent with `system` theme (adapts to terminal colors) |
 | **Homebrew** | `install.sh`, `bin/dev/Brewfile` | Package manager for CLI tools |
 | **dev** | `bin/dev/dev.sh` | Tmux session + worktree creation command |
 | **devc** | `bin/devc/devc.sh` | Tmux session + worktree cleanup command |

@@ -54,6 +54,8 @@ Creates symbolic links from the repository to their expected system locations:
 | `zsh/.zshrc` | `~/.zshrc` |
 | `tmux/.tmux.conf` | `~/.tmux.conf` |
 | `ghostty/config` | `~/.config/ghostty/config` |
+| `opencode/opencode.json` | `~/.config/opencode/opencode.json` |
+| `opencode/tui.json` | `~/.config/opencode/tui.json` |
 
 All symlinks use `ln -sf` (force mode), so existing files are overwritten. Back up any existing configs before running if needed.
 

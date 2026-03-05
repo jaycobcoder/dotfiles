@@ -16,7 +16,7 @@ bash install.sh
 
 - Homebrew 및 의존성 패키지 (`tmux`, `lazygit`, `zsh-syntax-highlighting`, `zsh-autosuggestions`, `neofetch`)
 - oh-my-zsh
-- 심볼릭 링크: `.zshrc`, `.tmux.conf`, ghostty config
+- 심볼릭 링크: `.zshrc`, `.tmux.conf`, ghostty config, opencode config
 - `dev`, `devc` 명령어 → `~/.local/bin`
 
 > `.zshrc`에 아래 줄이 있어야 명령어가 인식됩니다.
@@ -95,6 +95,9 @@ dotfiles/
 │   └── .tmux.conf
 ├── ghostty/
 │   └── config
+├── opencode/
+│   ├── opencode.json
+│   └── tui.json
 ├── bin/
 │   ├── dev/
 │   │   ├── dev.sh

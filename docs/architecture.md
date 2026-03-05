@@ -23,6 +23,10 @@ dotfiles/
 ├── ghostty/
 │   └── config                     # Ghostty terminal emulator configuration
 │
+├── opencode/
+│   ├── opencode.json              # OpenCode runtime configuration
+│   └── tui.json                   # OpenCode TUI theme/keybind settings
+│
 ├── bin/
 │   ├── dev/
 │   │   ├── dev.sh                 # Dev session launcher
@@ -59,6 +63,8 @@ The core mechanism of this dotfiles repo is **symbolic links**. Config files liv
 | `zsh/.zshrc` | `~/.zshrc` | `install.sh` |
 | `tmux/.tmux.conf` | `~/.tmux.conf` | `install.sh` |
 | `ghostty/config` | `~/.config/ghostty/config` | `install.sh` |
+| `opencode/opencode.json` | `~/.config/opencode/opencode.json` | `install.sh` |
+| `opencode/tui.json` | `~/.config/opencode/tui.json` | `install.sh` |
 | `bin/dev/dev.sh` | `~/.local/bin/dev` | `bin/dev/install.sh` |
 | `bin/devc/devc.sh` | `~/.local/bin/devc` | `bin/devc/install.sh` |
 
@@ -316,3 +322,4 @@ This modular design means individual components can be updated or reinstalled wi
 | Custom commands | Symlinks in `~/.local/bin` | Standard Unix convention, no PATH hacks needed |
 | Install approach | Single entry point (`install.sh`) | One command to set up everything |
 | Idempotency | Check-before-act pattern | Safe to re-run anytime |
+| OpenCode theme | `system` (terminal-adaptive) | Auto-adapts to Ghostty's Catppuccin Mocha, no manual color config |

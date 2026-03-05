@@ -197,6 +197,65 @@ Adds 10 pixels of padding on all sides between the terminal content and the wind
 
 ---
 
+## OpenCode — `opencode/opencode.json` & `opencode/tui.json`
+
+**Symlinked to**: `~/.config/opencode/opencode.json` and `~/.config/opencode/tui.json`
+
+Configuration for [OpenCode](https://opencode.ai/) — the AI coding agent launched in the `code` window of `dev` sessions.
+
+### Runtime Configuration — `opencode.json`
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "autoupdate": true
+}
+```
+
+This is a minimal runtime configuration. OpenCode supports a [rich configuration schema](https://opencode.ai/docs/config/) including:
+- `model` — Default LLM model (e.g., `"anthropic/claude-sonnet-4-5"`)
+- `provider` — Provider-specific options (timeout, API keys, etc.)
+- `tools` — Enable/disable specific tools (write, bash, etc.)
+- `permission` — Control whether tools require user approval
+- `agent` — Define specialized agents for specific tasks
+- `mcp` — Configure Model Context Protocol servers
+- `formatter` — Code formatting tools (prettier, etc.)
+
+The config file is merged across multiple locations with this priority (later overrides earlier):
+1. Remote config (`.well-known/opencode`) — organization defaults
+2. **Global config** (`~/.config/opencode/opencode.json`) — this dotfiles config
+3. Project config (`<project-root>/opencode.json`) — per-project overrides
+4. `.opencode/` directories — agents, commands, themes, plugins
+
+This means the global config in the dotfiles provides user-wide defaults, while individual projects can override settings by adding their own `opencode.json`.
+
+### TUI Configuration — `tui.json`
+
+```json
+{
+  "$schema": "https://opencode.ai/tui.json",
+  "theme": "system"
+}
+```
+
+The `system` theme is a special adaptive theme that:
+- **Generates a custom grayscale** based on your terminal's background color, ensuring optimal contrast
+- **Uses standard ANSI colors** (0-15) for syntax highlighting and UI elements, respecting your terminal's color palette
+- **Preserves terminal defaults** by using `"none"` for text and background colors, maintaining your terminal's appearance
+
+This is ideal when you want OpenCode to match your terminal's look. Since this dotfiles uses Ghostty with the Catppuccin Mocha theme, the `system` theme automatically adapts to those colors without any additional configuration.
+
+Other available themes include `tokyonight`, `catppuccin`, `gruvbox`, `nord`, and more. See the [full theme list](https://opencode.ai/docs/themes/).
+
+The `tui.json` also supports:
+- `keybinds` — Custom keyboard shortcuts
+- `scroll_speed` — Scrolling behavior
+- `diff_style` — How diffs are displayed (`"auto"`, `"side-by-side"`, `"unified"`)
+
+**Note**: The older `theme` and `keybinds` keys in `opencode.json` are deprecated. Use `tui.json` instead.
+
+---
+
 ## Customization Tips
 
 ### Changing the AI Agent
