@@ -1,33 +1,33 @@
-# Structure & Naming
+# 구조 및 네이밍
 
-## Package layout
+## 패키지 구조
 
 ```
 src/test/java/{basePackage}/{domain}/
-├── e2e/          # Full system flow (Controller → DB)
-├── integration/  # Service + Repository integration
-└── unit/         # Pure domain logic, no external dependencies
+├── e2e/          # 전체 시스템 흐름 (Controller → DB)
+├── integration/  # Service + Repository 통합 검증
+└── unit/         # 순수 도메인 로직, 외부 의존성 없음
 ```
 
-Split `e2e`, `integration`, `unit` packages per domain. The test target instance is always named `sut`.
+도메인 단위로 `e2e`, `integration`, `unit` 패키지를 분리한다. 테스트 대상 인스턴스는 항상 `sut`로 명명한다.
 
-## @Nested depth: max 3 levels
+## @Nested 깊이: 최대 3단계
 
 ```
-Context (outermost) → method / feature group being tested
-  └─ Describe        → scenario condition group
-       └─ It         → individual test case
+Context (최외곽)  → 테스트 대상 메서드 / 기능 그룹
+  └─ Describe     → 시나리오 조건 그룹
+       └─ It      → 개별 테스트 케이스
 ```
 
-## Naming rules
+## 네이밍 규칙
 
-| Element | Language | Example |
-|---------|----------|---------|
-| Class (Context) | Korean `@DisplayName` | `@DisplayName("사용자 생성")` |
-| Method name | **English** | `success()`, `failWhenDuplicateEmail()` |
-| `@DisplayName` | Korean | `@DisplayName("유효한 입력으로 사용자를 생성한다")` |
+| 요소 | 언어 | 예시 |
+|------|------|------|
+| 클래스 (Context) | 한글 `@DisplayName` | `@DisplayName("사용자 생성")` |
+| 메서드명 | **영문** | `success()`, `failWhenDuplicateEmail()` |
+| `@DisplayName` | 한글 | `@DisplayName("유효한 입력으로 사용자를 생성한다")` |
 
-## Full structure template
+## 전체 구조 템플릿
 
 ```java
 @SpringBootTest
