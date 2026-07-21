@@ -1,6 +1,6 @@
 # dotfiles
 
-개인 개발 환경 설정 및 유틸리티 스크립트 모음입니다.
+개인 개발 환경 설정 모음입니다. macOS 개발 환경을 코드로 관리하고, 여러 AI 코딩 도구의 지침을 **단일 원본(SSOT)** 으로 관리합니다.
 
 ## 설치
 
@@ -14,73 +14,26 @@ bash install.sh
 
 ### 설치 항목
 
-- Homebrew 및 의존성 패키지 (`tmux`, `lazygit`, `zsh-syntax-highlighting`, `zsh-autosuggestions`, `neofetch`)
+- Homebrew 및 의존성 패키지 (`zsh-syntax-highlighting`, `zsh-autosuggestions`, `neofetch`, `tmux`, `lazygit`, `node`)
+- Claude Code (npm으로 설치/업그레이드)
 - oh-my-zsh
-- 심볼릭 링크: `.zshrc`, `.tmux.conf`, ghostty config, opencode config
-- `dev`, `devc` 명령어 → `~/.local/bin`
-
-> `.zshrc`에 아래 줄이 있어야 명령어가 인식됩니다.
-> ```bash
-> export PATH="$HOME/.local/bin:$PATH"
-> ```
+- 심볼릭 링크: `.zshrc`, `.tmux.conf`, ghostty config
+- AI 지침(SSOT): `ai/AGENTS.md`·`ai/skills`를 각 AI 도구가 읽는 위치로 링크
+  - Claude Code → `~/.claude/CLAUDE.md`, `~/.claude/skills`
+  - Codex CLI → `~/.codex/AGENTS.md`, `~/.codex/skills`
 
 ---
 
-## 명령어
+## AI 지침 단일 원본(SSOT)
 
-### `dev [브랜치명]`
+여러 AI 코딩 도구(Claude Code, Codex 등)를 함께 쓰는데, 도구마다 읽는 지침 파일명이 다릅니다(Claude는 `CLAUDE.md`, Codex는 `AGENTS.md`, Gemini는 `GEMINI.md`). 도구마다 지침을 따로 관리하면 내용이 어긋나기 쉽습니다.
 
-tmux 세션을 생성하고 개발 환경을 세팅합니다.
+그래서 지침 원본을 `ai/` 한 곳에만 두고, 각 도구가 읽는 위치·파일명으로 심볼릭 링크합니다. **내용은 `ai/` 한 곳만 고치면 모든 도구에 반영됩니다.**
 
-**브랜치명 없이 실행** — 현재 디렉토리 기준으로 세션 생성
+- `ai/AGENTS.md` — 지침 원본 (프로젝트 개요 + 핵심 금지사항 + 문서 맵)
+- `ai/skills/` — 컨벤션 지식 (스킬 3종). Claude Code는 자동 로드하고, 그 외 도구는 `AGENTS.md` 문서 맵의 `skills/*/SKILL.md` 링크로 참조합니다.
 
-```bash
-dev
-```
-
-**브랜치명과 함께 실행** — git worktree + 브랜치 생성 후 세션 시작
-
-```bash
-dev feature/login
-```
-
-워크트리는 `../.worktrees/<repo명>/<브랜치명>`에 생성됩니다.
-
-세션 구성:
-- `code` 창 — `opencode` (AI 에이전트) 실행
-- `git` 창 — `lazygit` 실행
-- `term` 창 — 일반 터미널
-
-이미 세션이 존재하면 새로 만들지 않고 attach합니다.
-
----
-
-### `devc [-f] [브랜치명]`
-
-`dev`로 만든 tmux 세션과 git worktree를 제거합니다. (`devclear` / `devclean`의 약자)
-
-**브랜치명 없이 실행** — 현재 디렉토리 기준 tmux 세션만 제거
-
-```bash
-devc
-```
-
-**브랜치명과 함께 실행** — tmux 세션 + worktree + 브랜치 제거
-
-```bash
-devc feature/login
-```
-
-**`-f` 옵션** — 미머지 브랜치도 강제 삭제 (`branch -D`, `worktree remove --force`)
-
-```bash
-devc -f feature/login
-```
-
-| 옵션 | worktree remove | branch 삭제 |
-|------|----------------|-------------|
-| 기본 | 일반 제거 | `-d` (머지된 것만) |
-| `-f` | `--force` | `-D` (강제) |
+도구를 추가하려면 `install.sh`의 `link_ai_config <디렉토리> <지침파일명>` 호출 한 줄만 더하면 됩니다.
 
 ---
 
@@ -95,22 +48,16 @@ dotfiles/
 │   └── .tmux.conf
 ├── ghostty/
 │   └── config
-├── opencode/
-│   ├── opencode.json
-│   └── tui.json
-├── bin/
-│   ├── dev/
-│   │   ├── dev.sh
-│   │   ├── install.sh
-│   │   └── Brewfile
-│   └── devc/
-│       ├── devc.sh
-│       └── install.sh
+├── ai/                     # AI 코딩 도구 공통 지침 (SSOT)
+│   ├── AGENTS.md
+│   └── skills/
+│       ├── coding-convention/
+│       ├── writing-test-code/
+│       └── preventing-duplicate-requests/
 └── docs/
     ├── overview.md
     ├── installation.md
     ├── configuration.md
-    ├── commands.md
     └── architecture.md
 ```
 
@@ -120,8 +67,7 @@ dotfiles/
 
 자세한 문서는 `docs/` 디렉토리를 참고하세요.
 
-- [Project Overview](docs/overview.md) — 프로젝트 목적, 설계 철학, 핵심 구성 요소
-- [Installation Guide](docs/installation.md) — 상세 설치 가이드, 트러블슈팅
-- [Configuration Reference](docs/configuration.md) — 각 설정 파일(zsh, tmux, ghostty) 상세 명세
-- [Command Reference](docs/commands.md) — `dev`/`devc` 명령어 동작 원리, 워크플로우
-- [Architecture & Design](docs/architecture.md) — 심볼릭 링크 전략, 의존성 관리, worktree 아키텍처
+- [프로젝트 개요](docs/overview.md) — 프로젝트 목적, 설계 철학, 핵심 구성 요소
+- [설치 가이드](docs/installation.md) — 상세 설치 가이드, 트러블슈팅
+- [설정 레퍼런스](docs/configuration.md) — 각 설정 파일(zsh, tmux, ghostty)과 AI 지침(SSOT) 상세 명세
+- [아키텍처 및 설계](docs/architecture.md) — 심볼릭 링크 전략, 의존성 관리, AI 지침 SSOT 설계

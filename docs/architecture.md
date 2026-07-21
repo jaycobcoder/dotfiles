@@ -1,325 +1,267 @@
-# Architecture & Design
+# 아키텍처 및 설계
 
-This document explains the structural decisions behind the dotfiles repository — how files are organized, how they reach their system locations, how dependencies are managed, and why certain patterns were chosen.
+이 문서는 dotfiles 저장소의 구조적 결정을 설명한다 — 파일을 어떻게 조직하고, 어떻게 시스템 위치로 배치하며, 의존성을 어떻게 관리하고, 특정 패턴을 왜 선택했는지 다룬다.
 
 ---
 
-## Directory Structure
+## 디렉토리 구조
 
 ```
 dotfiles/
-├── .git/                          # Git repository
-├── .gitignore                     # Ignores .worktrees/
-├── .worktrees/                    # Runtime: git worktrees (gitignored)
-├── README.md                      # Quick-start documentation (Korean)
-├── install.sh                     # Master install script (entry point)
+├── .git/                          # Git 저장소
+├── .gitignore                     # .worktrees/ 무시
+├── README.md                      # 빠른 시작 문서 (한글)
+├── install.sh                     # 마스터 설치 스크립트 (진입점)
 │
 ├── zsh/
-│   └── .zshrc                     # Zsh shell configuration
+│   └── .zshrc                     # Zsh 셸 설정
 │
 ├── tmux/
-│   └── .tmux.conf                 # Tmux multiplexer configuration
+│   └── .tmux.conf                 # tmux 멀티플렉서 설정
 │
 ├── ghostty/
-│   └── config                     # Ghostty terminal emulator configuration
+│   └── config                     # Ghostty 터미널 설정
 │
-├── opencode/
-│   ├── opencode.json              # OpenCode runtime configuration
-│   └── tui.json                   # OpenCode TUI theme/keybind settings
-│
-├── bin/
-│   ├── dev/
-│   │   ├── dev.sh                 # Dev session launcher
-│   │   ├── install.sh             # Dev command installer
-│   │   └── Brewfile               # Homebrew dependencies for dev
-│   └── devc/
-│       ├── devc.sh                # Dev session cleanup
-│       └── install.sh             # Devc command installer
+├── ai/                            # AI 코딩 도구 공통 지침 (SSOT)
+│   ├── AGENTS.md                  # 지침 원본
+│   └── skills/                    # 지식 원본 (스킬 3종)
+│       ├── coding-convention/     # SKILL.md + reference/
+│       ├── writing-test-code/     # SKILL.md + reference/
+│       └── preventing-duplicate-requests/  # SKILL.md
 │
 └── docs/
-    ├── overview.md                # Project overview and philosophy
-    ├── installation.md            # Installation guide
-    ├── configuration.md           # Configuration file reference
-    ├── commands.md                # dev/devc command reference
-    └── architecture.md            # This file
+    ├── overview.md                # 프로젝트 개요와 철학
+    ├── installation.md            # 설치 가이드
+    ├── configuration.md           # 설정 파일 레퍼런스
+    └── architecture.md            # 이 파일
 ```
 
-### Naming Conventions
+### 네이밍 컨벤션
 
-- **Config directories** are named after their tool: `zsh/`, `tmux/`, `ghostty/`
-- **Config files** keep their original names (including leading dots): `.zshrc`, `.tmux.conf`
-- **Custom commands** live under `bin/<command-name>/` with the script, its installer, and any dependencies (like Brewfile) co-located
+- **설정 디렉토리**는 해당 도구 이름을 따른다: `zsh/`, `tmux/`, `ghostty/`
+- **설정 파일**은 원래 이름(선행 점 포함)을 유지한다: `.zshrc`, `.tmux.conf`
+- **AI 공통 지침**은 `ai/` 아래에 원본을 한 벌만 둔다: 지침 문서 `AGENTS.md`, 지식 원본 `skills/`
 
 ---
 
-## Symlink Strategy
+## 심볼릭 링크 전략
 
-The core mechanism of this dotfiles repo is **symbolic links**. Config files live in the git repository, and symlinks connect them to the locations where tools expect them.
+이 dotfiles 저장소의 핵심 메커니즘은 **심볼릭 링크**다. 설정 파일은 git 저장소 안에 두고, 심볼릭 링크로 각 도구가 기대하는 위치와 연결한다.
 
-### Symlink Map
+### 심볼릭 링크 맵
 
-| Source (in repository) | Target (on system) | Created by |
+| 원본(저장소) | 대상(시스템) | 생성 주체 |
 |------------------------|-------------------|------------|
 | `zsh/.zshrc` | `~/.zshrc` | `install.sh` |
 | `tmux/.tmux.conf` | `~/.tmux.conf` | `install.sh` |
 | `ghostty/config` | `~/.config/ghostty/config` | `install.sh` |
-| `opencode/opencode.json` | `~/.config/opencode/opencode.json` | `install.sh` |
-| `opencode/tui.json` | `~/.config/opencode/tui.json` | `install.sh` |
-| `bin/dev/dev.sh` | `~/.local/bin/dev` | `bin/dev/install.sh` |
-| `bin/devc/devc.sh` | `~/.local/bin/devc` | `bin/devc/install.sh` |
+| `ai/AGENTS.md` | `~/.claude/CLAUDE.md` | `install.sh` (`link_ai_config`) |
+| `ai/skills` | `~/.claude/skills` | `install.sh` (`link_ai_config`) |
+| `ai/AGENTS.md` | `~/.codex/AGENTS.md` | `install.sh` (`link_ai_config`) |
+| `ai/skills` | `~/.codex/skills` | `install.sh` (`link_ai_config`) |
 
-### How It Works
+### 동작 원리
 
 ```
-~/company/dotfiles/zsh/.zshrc    ← Actual file (git-tracked)
+~/company/dotfiles/zsh/.zshrc    ← 실제 파일 (git 추적 대상)
          ↑
          │  ln -sf
          │
-~/.zshrc                          ← Symlink (what Zsh reads)
+~/.zshrc                          ← 심볼릭 링크 (Zsh가 읽는 대상)
 ```
 
-All symlinks are created with `ln -sf` (symbolic, force):
-- **`-s`**: Creates a symbolic link (not a hard link), so it works across filesystems
-- **`-f`**: Overwrites any existing file or symlink at the target path
+일반 설정 파일 링크는 `ln -sf`(symbolic, force)로 생성한다:
+- **`-s`**: 심볼릭 링크를 만든다(하드 링크가 아니므로 파일시스템을 넘나들어도 동작한다)
+- **`-f`**: 대상 경로에 이미 파일이나 링크가 있으면 덮어쓴다
 
-This means:
-- Editing `~/.zshrc` directly edits the file in the repo (they're the same file via symlink)
-- `git diff` in the repo shows changes made through either path
-- Running `install.sh` again safely re-creates all symlinks (idempotent)
+디렉토리를 가리키는 링크(예: `skills/`)나 이미 존재하는 심볼릭 링크를 갱신할 때는 `ln -sfn`을 사용한다:
+- **`-n`**: 대상이 이미 디렉토리를 가리키는 심볼릭 링크일 때, 그 안으로 들어가 링크를 생성하지 않고 링크 자체를 교체한다
 
-### Why Symlinks (Not Copies)
+이 방식은 다음을 의미한다:
+- `~/.zshrc`를 직접 편집하는 것은 저장소 안의 파일을 편집하는 것과 같다(심볼릭 링크로 동일 파일이다)
+- 저장소에서 `git diff`는 어느 경로로 편집했든 변경을 보여준다
+- `install.sh`를 다시 실행해도 모든 심볼릭 링크가 안전하게 재생성된다(멱등)
 
-Alternatives considered:
-- **Copying files**: Changes in the system location wouldn't be reflected in the repo, requiring manual sync
-- **GNU Stow**: A tool that automates symlink management. Adds a dependency for a small number of links. The current approach keeps things simple with explicit `ln -sf` commands.
-- **Direct home directory repo**: Using `$HOME` as the git repo. This clutters `git status` with every file in the home directory and requires extensive `.gitignore` rules.
+### 왜 심볼릭 링크인가(복사가 아니라)
 
-Symlinks provide the best balance: the repo stays clean, edits propagate instantly, and the mechanism is transparent.
+검토한 대안:
+- **파일 복사**: 시스템 위치의 변경이 저장소에 반영되지 않아 수동 동기화가 필요하다
+- **GNU Stow**: 심볼릭 링크 관리를 자동화하는 도구다. 링크 수가 적은데도 의존성을 하나 추가하게 된다. 현재 방식은 명시적인 `ln -sf` 명령으로 단순함을 유지한다
+- **홈 디렉토리 자체를 저장소로**: `$HOME`을 git 저장소로 쓰는 방식이다. 홈의 모든 파일이 `git status`를 어지럽히고 방대한 `.gitignore` 규칙이 필요하다
+
+심볼릭 링크는 최적의 균형을 제공한다: 저장소는 깔끔하게 유지되고, 편집이 즉시 반영되며, 메커니즘이 투명하다.
+
+### `link_ai_config` 헬퍼로 여러 도구에 지침 링크하기
+
+AI 지침은 도구마다 읽는 파일명과 위치가 다르다(자세한 배경은 아래 "AI 지침 SSOT 설계" 참고). 이를 위해 `install.sh`는 `link_ai_config` 헬퍼 함수를 둔다.
+
+```bash
+# link_ai_config <대상디렉토리> <지침파일명>
+link_ai_config() {
+    local target_dir="$1"
+    local instruction_name="$2"
+    mkdir -p "$target_dir"
+    # 지침 파일: 도구가 요구하는 파일명으로 링크 (CLAUDE.md / AGENTS.md / GEMINI.md ...)
+    ln -sfn "$AI_SRC/AGENTS.md" "$target_dir/$instruction_name"
+    # 지식 원본 skills/ 를 지침 파일 옆에 링크
+    [ -L "$target_dir/skills" ] && rm -f "$target_dir/skills"
+    ln -sfn "$AI_SRC/skills" "$target_dir/skills"
+}
+
+link_ai_config ~/.claude CLAUDE.md
+link_ai_config ~/.codex AGENTS.md
+```
+
+함수는 두 가지를 한다:
+1. 원본 `ai/AGENTS.md`를 도구가 요구하는 파일명(`CLAUDE.md`, `AGENTS.md` 등)으로 링크한다
+2. 지식 원본 `ai/skills/`를 지침 파일 바로 옆에 링크한다. 문서 맵의 `skills/*/SKILL.md` 상대 경로가 풀리도록 하기 위함이다
+
+도구를 추가할 때는 읽는 경로를 확인한 뒤 `link_ai_config` 호출을 **한 줄** 더하기만 하면 된다.
 
 ---
 
-## Dependency Management
+## 의존성 관리
 
-### Homebrew Packages
+### Homebrew 패키지
 
-Dependencies are installed at two levels:
-
-#### Level 1: `install.sh` (Global)
-
-The master install script installs packages needed by the shell environment:
+의존성은 단일 진입점인 `install.sh`에서 설치한다. 마스터 설치 스크립트가 셸 환경과 개발 도구에 필요한 패키지를 설치한다:
 
 ```bash
-brew install zsh-syntax-highlighting  # Shell syntax coloring
-brew install zsh-autosuggestions       # Command suggestions
-brew install neofetch                  # System info display
-brew install tmux                      # Terminal multiplexer
+brew install zsh-syntax-highlighting  # 셸 구문 색상
+brew install zsh-autosuggestions       # 명령 자동 제안
+brew install neofetch                  # 시스템 정보 표시
+brew install tmux                      # 터미널 멀티플렉서
 brew install lazygit                   # Git TUI
+brew install node                      # Node.js (Claude Code npm 설치용)
 ```
 
-#### Level 2: `bin/dev/Brewfile` (Dev Command)
+Homebrew 패키지 설치에 이어 Claude Code CLI를 npm으로 설치하거나 업그레이드한다:
 
-The `dev` command has its own Brewfile for additional tooling:
-
-```ruby
-brew "tmux"       # Session and window management
-brew "lazygit"    # Git TUI
-brew "fzf"        # Fuzzy finder
-brew "git-delta"  # Enhanced diff viewer
-brew "ripgrep"    # Fast search
+```bash
+if command -v claude &>/dev/null; then
+    npm update -g @anthropic-ai/claude-code
+else
+    npm install -g @anthropic-ai/claude-code
+fi
 ```
 
-This is installed via `brew bundle --file=bin/dev/Brewfile` during `bin/dev/install.sh`.
-
-Some packages (tmux, lazygit) appear in both — this is intentional. Each installer is self-contained and can be run independently.
-
-### Why Not a Single Brewfile?
-
-The two-level approach exists because:
-1. The global `install.sh` handles the minimal set needed for shell configuration
-2. The dev Brewfile adds tools specific to the development workflow
-3. Either can be run independently without the other
+모든 의존성을 하나의 스크립트에서 관리하므로 별도 Brewfile이나 하위 설치 스크립트 없이 명령 한 번으로 환경 전체를 구성한다.
 
 ---
 
-## The `.zshrc.local` Pattern
+## `.zshrc.local` 패턴
 
-### Problem
+### 문제
 
-Some settings are machine-specific and should never be committed to git:
-- API keys and secrets
-- Company-internal environment variables
-- Paths that differ between machines (e.g., SDK locations)
-- User-specific preferences (like `DEFAULT_USER`)
+일부 설정은 머신마다 다르며 git에 커밋해서는 안 된다:
+- API 키와 시크릿
+- 회사 내부 환경변수
+- 머신마다 다른 경로(예: SDK 위치)
+- 사용자별 선호 설정(예: `DEFAULT_USER`)
 
-### Solution
+### 해결
 
-The `.zshrc` ends with:
+`.zshrc`는 다음 줄로 끝난다:
 
 ```bash
-# Last line of .zshrc
+# .zshrc의 마지막 줄
 [ -f ~/.zshrc.local ] && source ~/.zshrc.local
 ```
 
-This conditionally sources `~/.zshrc.local` **if it exists**. The file:
-- Lives only on the local machine
-- Is never created or managed by the dotfiles repo
-- Is not listed in `.gitignore` (it doesn't need to be — it's outside the repo directory)
-- Runs last, so it can override any setting from `.zshrc`
+이는 `~/.zshrc.local`이 **존재할 때만** 조건부로 source 한다. 이 파일은:
+- 로컬 머신에만 존재한다
+- dotfiles 저장소가 생성하거나 관리하지 않는다
+- `.gitignore`에 넣을 필요가 없다(저장소 디렉토리 바깥에 있으므로 애초에 추적되지 않는다)
+- 가장 마지막에 실행되므로 `.zshrc`의 어떤 설정이든 덮어쓸 수 있다
 
-### Execution Order
+### 실행 순서
 
 ```
-Shell starts
-  └── sources ~/.zshrc (symlink → dotfiles/zsh/.zshrc)
-        ├── Ghostty terminfo fix
-        ├── oh-my-zsh setup
-        ├── prompt_context override
-        ├── syntax highlighting & autosuggestions
+셸 시작
+  └── ~/.zshrc source (심볼릭 링크 → dotfiles/zsh/.zshrc)
+        ├── Ghostty terminfo 보정
+        ├── oh-my-zsh 설정
+        ├── prompt_context 재정의
+        ├── 구문 강조 & 자동 제안
         ├── neofetch
         ├── JAVA_HOME, PATH
-        └── sources ~/.zshrc.local (if exists)
-              └── Machine-specific overrides
+        └── ~/.zshrc.local source (존재할 때)
+              └── 머신별 재정의
 ```
 
-### Example `.zshrc.local`
+### `.zshrc.local` 예시
 
 ```bash
-# Company machine
+# 회사 머신
 export DEFAULT_USER="kiwooso"
 export COMPANY_PROXY="http://proxy.internal:8080"
 export ARTIFACTORY_TOKEN="eyJ..."
 
-# Personal machine
+# 개인 머신
 export DEFAULT_USER="jaycob"
 export GOPATH="$HOME/go"
 ```
 
 ---
 
-## Git Worktree Architecture
+## AI 지침 SSOT 설계
 
-### What Are Git Worktrees?
+### 문제
 
-A git worktree is an additional working directory attached to the same repository. Unlike `git clone`, worktrees share the same `.git` data — branches, history, and objects are shared. This means:
-- No duplicate downloads or disk space for repository data
-- Branch operations (create, delete, merge) affect the same repo
-- Each worktree has its own working directory and index (staging area)
+Claude Code, Codex 등 여러 AI 코딩 도구를 함께 쓰는데, 도구마다 읽는 지침 파일명이 다르다(`CLAUDE.md` / `AGENTS.md` / `GEMINI.md`). 도구별로 지침을 복제해서 관리하면 시간이 지날수록 내용이 서로 갈라진다(drift).
 
-### Worktree Layout
+### 해결
 
-When `dev feature/auth` is run from `~/workspaces/my-project`:
+지침 원본을 `ai/AGENTS.md` **한 곳**에만 둔다. 그리고 각 도구가 읽는 위치·파일명으로 심볼릭 링크한다(SSOT, Single Source of Truth). 컨벤션·테스트 등 지식도 `ai/skills/`에 한 벌만 둔다.
 
-```
-~/workspaces/
-├── my-project/                         ← Main working tree (main branch)
-│   ├── .git/                           ← Repository data (shared)
-│   ├── src/
-│   └── ...
-│
-└── .worktrees/                         ← Worktree root (gitignored)
-    └── my-project/
-        ├── feature/auth/               ← Worktree (feature/auth branch)
-        │   ├── .git                    ← File (pointer to main .git)
-        │   ├── src/
-        │   └── ...
-        └── bugfix/login/              ← Another worktree
-            ├── .git
-            ├── src/
-            └── ...
-```
+- `link_ai_config <디렉토리> <지침파일명>` 함수가 `AGENTS.md`를 해당 파일명으로 링크하고, `skills/`를 그 옆에 함께 링크한다
+- 도구 추가는 함수 호출 한 줄로 끝난다
+- **로딩 차이**: Claude는 `skills/`를 자동으로 로드한다. 그 외 도구는 `AGENTS.md` 문서 맵에 있는 `skills/*/SKILL.md` 링크를 참조하는 방식으로 지식에 접근한다. 이 때문에 지침 파일 옆에 `skills/` 링크를 함께 두어 문서 맵의 상대 경로가 풀리도록 한다
 
-Key points:
-- Worktrees are created one level up from the project: `../.worktrees/<repo>/<branch>`
-- This keeps worktrees outside the main project directory
-- `.worktrees/` is in `.gitignore` so it's never committed
-- Each worktree's `.git` is a file (not a directory) that points back to the main `.git` directory
-
-### Why This Location?
-
-The worktree base is `../.worktrees/` (sibling to the project), not inside the project itself. This avoids:
-- Cluttering the project directory with worktree folders
-- Accidentally including worktree files in searches or builds
-- Conflicts with tools that scan the project root
-
-### Session-Worktree Mapping
-
-Each `dev` session maps 1:1 to a worktree:
-
-```
-dev feature/auth
-  → Worktree: ../.worktrees/my-project/feature/auth
-  → Session:  my-project_feature/auth
-  → Windows:  code | git | term  (all in worktree directory)
-
-dev bugfix/login
-  → Worktree: ../.worktrees/my-project/bugfix/login
-  → Session:  my-project_bugfix/login
-  → Windows:  code | git | term  (all in worktree directory)
-```
-
-This 1:1 mapping means:
-- Each AI agent works in a completely isolated directory
-- Git operations in one session don't affect another
-- `devc` can cleanly remove the session, worktree, and branch together
+이 설계로 내용은 한 곳에서만 수정하면 되고, 도구가 늘어나도 원본이 갈라지지 않는다.
 
 ---
 
-## Install Script Design
+## 설치 스크립트 설계
 
-### Idempotency
+### 멱등성
 
-Every operation in `install.sh` is safe to run multiple times:
+`install.sh`의 모든 작업은 여러 번 실행해도 안전하다:
 
-| Operation | Idempotency mechanism |
+| 작업 | 멱등성 수단 |
 |-----------|----------------------|
-| Homebrew install | `command -v brew` check — skips if present |
-| `brew install` | Homebrew no-ops for already-installed packages |
-| `ln -sf` | Force flag overwrites existing symlinks |
-| `mkdir -p` | No-op if directory exists |
-| oh-my-zsh install | `[ ! -d "$HOME/.oh-my-zsh" ]` check |
+| Homebrew 설치 | `command -v brew` 체크 — 이미 있으면 건너뜀 |
+| `brew install` | 이미 설치된 패키지는 Homebrew가 no-op 처리 |
+| Claude Code 설치 | `command -v claude` 체크로 install/update 분기 |
+| `ln -sf` / `ln -sfn` | force 플래그로 기존 링크 덮어쓰기 |
+| `mkdir -p` | 디렉토리가 있으면 no-op |
+| oh-my-zsh 설치 | `[ ! -d "$HOME/.oh-my-zsh" ]` 체크 |
 
-### Execution Flow
+### 실행 흐름
 
 ```
 install.sh
-├── 1. Check/install Homebrew
-├── 2. brew install (5 packages)
-├── 3. Symlink .zshrc, .tmux.conf, ghostty/config
-├── 4. Run bin/dev/install.sh
-│     ├── Check Homebrew
-│     ├── brew bundle (Brewfile)
-│     └── Symlink dev.sh → ~/.local/bin/dev
-├── 5. Run bin/devc/install.sh
-│     └── Symlink devc.sh → ~/.local/bin/devc
-└── 6. Install oh-my-zsh (if missing)
+├── 1. Homebrew 확인/설치
+├── 2. brew install (zsh-syntax-highlighting, zsh-autosuggestions,
+│                    neofetch, tmux, lazygit, node)
+├── 3. Claude Code npm 설치/업그레이드
+├── 4. 심볼릭 링크 (.zshrc, .tmux.conf, ghostty/config)
+├── 5. AI 지침 SSOT 링크 (link_ai_config)
+│     ├── ~/.claude   (CLAUDE.md, skills)
+│     └── ~/.codex    (AGENTS.md, skills)
+└── 6. oh-my-zsh 설치 (없을 때만)
 ```
-
-### Sub-Installer Independence
-
-`bin/dev/install.sh` and `bin/devc/install.sh` can be run independently:
-
-```bash
-# Only install the dev command
-bash bin/dev/install.sh
-
-# Only install the devc command
-bash bin/devc/install.sh
-```
-
-This modular design means individual components can be updated or reinstalled without running the entire setup.
 
 ---
 
-## Design Decisions Summary
+## 설계 결정 요약
 
-| Decision | Choice | Rationale |
+| 결정 | 선택 | 근거 |
 |----------|--------|-----------|
-| Config deployment | Symlinks (`ln -sf`) | Instant propagation, transparent, no sync needed |
-| Package manager | Homebrew | De facto standard on macOS, declarative via Brewfile |
-| Shell framework | oh-my-zsh | Rich plugin ecosystem, widely supported themes |
-| Local overrides | `.zshrc.local` pattern | Clean separation of shared vs machine-specific config |
-| Worktree location | `../.worktrees/` | Outside project tree, avoids pollution |
-| Custom commands | Symlinks in `~/.local/bin` | Standard Unix convention, no PATH hacks needed |
-| Install approach | Single entry point (`install.sh`) | One command to set up everything |
-| Idempotency | Check-before-act pattern | Safe to re-run anytime |
-| OpenCode theme | `system` (terminal-adaptive) | Auto-adapts to Ghostty's Catppuccin Mocha, no manual color config |
+| 설정 배포 | 심볼릭 링크(`ln -sf` / `ln -sfn`) | 즉시 반영, 투명함, 동기화 불필요 |
+| 패키지 관리자 | Homebrew | macOS의 사실상 표준 |
+| 셸 프레임워크 | oh-my-zsh | 풍부한 플러그인 생태계, 널리 지원되는 테마 |
+| 로컬 재정의 | `.zshrc.local` 패턴 | 공용 설정과 머신별 설정의 깔끔한 분리 |
+| AI 지침 관리 | SSOT (단일 원본 + 심볼릭 링크) | 원본을 한 곳에 두고 도구별 위치로 링크, drift 방지 |
+| 설치 방식 | 단일 진입점(`install.sh`) | 명령 한 번으로 전체 구성 |
+| 멱등성 | check-before-act 패턴 | 언제든 안전하게 재실행 |
