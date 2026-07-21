@@ -60,9 +60,11 @@ link_ai_config ~/.claude CLAUDE.md
 # Codex CLI
 link_ai_config ~/.codex AGENTS.md
 
+# Antigravity CLI (agy) — Gemini 계열이라 ~/.gemini 를 설정 홈으로 쓰고 GEMINI.md 를 읽는다
+link_ai_config ~/.gemini GEMINI.md
+
 # 추가 도구는 읽는 경로를 확인한 뒤 아래 형식으로 한 줄 추가:
-#   Antigravity  →  link_ai_config ~/.config/<경로> AGENTS.md
-#   Kimi / Gemini →  link_ai_config ~/.<경로> {AGENTS.md|GEMINI.md}
+#   Kimi 등  →  link_ai_config ~/.<경로> {AGENTS.md|GEMINI.md}
 
 # oh-my-zsh 설치
 if [ ! -d "$HOME/.oh-my-zsh" ]; then

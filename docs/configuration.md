@@ -207,7 +207,7 @@ window-padding-y = 10
 |---|---|
 | Claude Code | `CLAUDE.md` |
 | Codex | `AGENTS.md` |
-| Gemini | `GEMINI.md` |
+| Antigravity (agy) / Gemini | `GEMINI.md` |
 
 파일명이 제각각이지만 내용은 동일해야 하므로, 지침 원본을 `ai/AGENTS.md` **한 곳**에만 두고 각 도구가 읽는 위치·파일명으로 심볼릭 링크한다. 내용을 수정할 때는 이 한 곳만 고치면 모든 도구에 반영된다. 이것이 이 디렉토리를 SSOT(Single Source of Truth, 단일 진실 공급원)로 두는 이유다.
 

@@ -21,6 +21,7 @@ bash install.sh
 - AI 지침(SSOT): `ai/AGENTS.md`·`ai/skills`를 각 AI 도구가 읽는 위치로 링크
   - Claude Code → `~/.claude/CLAUDE.md`, `~/.claude/skills`
   - Codex CLI → `~/.codex/AGENTS.md`, `~/.codex/skills`
+  - Antigravity (agy) → `~/.gemini/GEMINI.md`, `~/.gemini/skills`
 
 ---
 

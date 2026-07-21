@@ -82,6 +82,8 @@ fi
 | `ai/skills` | `~/.claude/skills` | Claude Code |
 | `ai/AGENTS.md` | `~/.codex/AGENTS.md` | Codex CLI |
 | `ai/skills` | `~/.codex/skills` | Codex CLI |
+| `ai/AGENTS.md` | `~/.gemini/GEMINI.md` | Antigravity (agy) |
+| `ai/skills` | `~/.gemini/skills` | Antigravity (agy) |
 
 내용은 한 곳에서만 관리하므로, 도구가 늘어나도 `install.sh`에 `link_ai_config <디렉토리> <파일명>` 한 줄만 추가하면 된다.
 
@@ -91,6 +93,9 @@ link_ai_config ~/.claude CLAUDE.md
 
 # Codex CLI
 link_ai_config ~/.codex AGENTS.md
+
+# Antigravity CLI (agy)
+link_ai_config ~/.gemini GEMINI.md
 ```
 
 ### 6단계: oh-my-zsh
