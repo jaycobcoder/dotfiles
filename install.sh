@@ -64,14 +64,6 @@ link_ai_config ~/.codex AGENTS.md
 #   Antigravity  →  link_ai_config ~/.config/<경로> AGENTS.md
 #   Kimi / Gemini →  link_ai_config ~/.<경로> {AGENTS.md|GEMINI.md}
 
-# ---------- 커스텀 명령어 ----------
-# dev 명령어
-bash "$DOTFILES_DIR/bin/dev/install.sh"
-
-# devc 명령어
-bash "$DOTFILES_DIR/bin/devc/install.sh"
-
-
 # oh-my-zsh 설치
 if [ ! -d "$HOME/.oh-my-zsh" ]; then
     echo "📦 oh-my-zsh 설치..."
